@@ -17,7 +17,7 @@ def calculate_bollinger_bands(
     upper_band = middle_band + std
     lower_band = middle_band - std
 
-    return lower_band, middle_band, upper_band  # pyright: ignore[reportReturnType]
+    return lower_band, middle_band, upper_band
 
 
 def generate_bollinger_signals(

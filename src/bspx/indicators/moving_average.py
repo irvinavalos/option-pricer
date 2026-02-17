@@ -13,7 +13,7 @@ def calculate_moving_averages(
     short_ma = data[price_col].rolling(window=short_window).mean()
     long_ma = data[price_col].rolling(window=long_window).mean()
 
-    return short_ma, long_ma  # pyright: ignore[reportReturnType]
+    return short_ma, long_ma
 
 
 def generate_ma_crossover_signals(short_ma: pd.Series, long_ma: pd.Series) -> pd.Series:

@@ -32,7 +32,7 @@ def _download_ticker_returns(
         return None
 
     if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns._get_level_values(0)
+        df.columns = df.columns.get_level_values(0)
 
     return df
 
@@ -55,7 +55,7 @@ def _validate_and_clean_data(df: pd.DataFrame, ticker: Ticker) -> pd.DataFrame |
     if "Volume" in df.columns:
         keep_cols.append("Volume")
 
-    return df[keep_cols].copy()  # pyright: ignore[reportReturnType]
+    return df[keep_cols].copy()
 
 
 def get_stock_data(

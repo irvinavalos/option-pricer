@@ -31,13 +31,13 @@ def _add_moving_average_traces(
     fig.add_trace(
         go.Scatter(x=data.index, y=data["Short_MA"], mode="lines", name="Short MA"),
         row=row,
-        col=row,
+        col=col,
     )
 
     fig.add_trace(
         go.Scatter(x=data.index, y=data["Long_MA"], mode="lines", name="Long MA"),
         row=row,
-        col=row,
+        col=col,
     )
 
 
