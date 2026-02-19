@@ -19,7 +19,7 @@ def _validate_inputs(
     if np.any(np.asarray(T) <= 0):
         raise ValueError(f"Error: Time to maturity 'T' must be positive\n Got: {T}")
     if np.any(np.asarray(vol) <= 0):
-        raise ValueError(f"Error:Volatility 'vol' must be positive\n Got: {vol}")
+        raise ValueError(f"Error: Volatility 'vol' must be positive\n Got: {vol}")
 
 
 @dataclass(slots=True, frozen=True)
