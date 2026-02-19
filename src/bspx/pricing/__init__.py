@@ -1,4 +1,4 @@
-from .black_scholes_model import (
+from bspx.pricing.black_scholes_model import (
     BlackScholesState,
     black_scholes_price,
     build_black_scholes_state,
