@@ -19,3 +19,6 @@ class Greeks:
     gamma: ArrayLike
     vega: ArrayLike
     rho: ArrayLike
+
+    def __repr__(self) -> str:
+        return f"Greeks(delta={self.delta},theta={self.theta}, gamma={self.gamma}, vega={self.vega}, rho={self.rho})"
