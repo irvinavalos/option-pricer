@@ -116,7 +116,7 @@ def black_scholes_price(
     r: ArrayLike,
     vol: ArrayLike,
     option_type: OptionType = "call",
-) -> ArrayLike | tuple[ArrayLike, ArrayLike]:
+) -> ArrayLike:
     state = build_black_scholes_state(S, K, T, r, vol)
 
     match option_type:
