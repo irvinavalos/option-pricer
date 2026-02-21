@@ -9,5 +9,8 @@ wheels/
 # Virtual environments
 .venv
 
+# Unit test
+.hypothesis/
+
 # Local data folder
 data/

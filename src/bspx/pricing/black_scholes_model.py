@@ -77,7 +77,7 @@ def build_black_scholes_state(
     sqrt_t = np.sqrt(T)
     vol_sqrt_t = vol * sqrt_t
 
-    d1 = (np.log(S / K) + (r + 0.5 * vol**2) * T) / vol_sqrt_t
+    d1 = (np.log(S / K) + (r + 0.5 * np.square(vol)) * T) / vol_sqrt_t
     d2 = d1 - vol_sqrt_t
 
     return BlackScholesState(

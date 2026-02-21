@@ -1,8 +1,7 @@
+from bspx.constants import TRADING_DAYS_PER_YEAR
 from bspx.instruments import Greeks
 from bspx.pricing import BlackScholesState
 from bspx.types import ArrayLike, OptionType
-
-TRADING_DAYS = 252
 
 
 def delta(state: BlackScholesState, option_type: OptionType) -> ArrayLike:
@@ -19,9 +18,9 @@ def theta(state: BlackScholesState, option_type: OptionType) -> ArrayLike:
 
     match option_type:
         case "call":
-            return (decay - state.r * discount * state.cdf_d2) / TRADING_DAYS
+            return (decay - state.r * discount * state.cdf_d2) / TRADING_DAYS_PER_YEAR
         case "put":
-            return (decay + state.r * discount * state.cdf_nd2) / TRADING_DAYS
+            return (decay + state.r * discount * state.cdf_nd2) / TRADING_DAYS_PER_YEAR
 
 
 def gamma(state: BlackScholesState) -> ArrayLike:

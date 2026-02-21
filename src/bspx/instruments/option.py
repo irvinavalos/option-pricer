@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from bspx.types import ArrayLike
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class OptionPrice:
     call: ArrayLike
     put: ArrayLike
@@ -12,7 +12,7 @@ class OptionPrice:
         return f"OptionPrice(call={self.call}, put={self.put})"
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class Greeks:
     delta: ArrayLike
     theta: ArrayLike
