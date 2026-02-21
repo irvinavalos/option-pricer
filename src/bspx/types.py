@@ -1,18 +1,9 @@
-from typing import Any, Callable, Literal, NamedTuple, TypeGuard
+from typing import Callable, Literal, NamedTuple
 
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
 
 type OptionType = Literal["call", "put"]
-
-type Scalar = int | float | np.number
-type Array = np.ndarray
-type ArrayLike = Scalar | Array
-
-
-# TODO: add error checking if type None is passed in
-def is_array(val: Any) -> TypeGuard[Array]:
-    return isinstance(val, np.ndarray) and np.issubdtype(val.dtype, np.number)
-
 
 type PricingFunction = Callable[
     [
@@ -23,7 +14,7 @@ type PricingFunction = Callable[
         ArrayLike,
         OptionType,
     ],
-    ArrayLike,
+    NDArray[np.float64],
 ]
 
 
