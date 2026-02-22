@@ -8,38 +8,38 @@ from bspx.pricing.black_scholes_model import (
     call_price,
     put_price,
 )
-from bspx.types import OptionTestCase
+from tests.cases import OptionTestCase
 from tests.hypothesis_strategies import gen_black_scholes_parameters
 
 
 def _build_state_from_test_case(
-    test_case_hull_15_6: OptionTestCase,
+    hull_15: OptionTestCase,
 ) -> BlackScholesState:
     return build_black_scholes_state(
-        S=test_case_hull_15_6.S,
-        K=test_case_hull_15_6.K,
-        T=test_case_hull_15_6.T,
-        r=test_case_hull_15_6.r,
-        vol=test_case_hull_15_6.vol,
+        S=hull_15.market.S,
+        K=hull_15.market.K,
+        T=hull_15.market.T,
+        r=hull_15.market.r,
+        vol=hull_15.market.vol,
     )
 
 
-def test_black_scholes_call_hull(test_case_hull_15_6: OptionTestCase):
+def test_black_scholes_call_hull(hull_15: OptionTestCase):
     """Test call price method matches Hull example 15.6"""
-    state = _build_state_from_test_case(test_case_hull_15_6)
+    state = _build_state_from_test_case(hull_15)
 
     call = call_price(state)
 
-    assert call == pytest.approx(test_case_hull_15_6.expected_call, abs=0.01)
+    assert call == pytest.approx(hull_15.expected_call, abs=0.01)
 
 
-def test_black_scholes_put_hull(test_case_hull_15_6: OptionTestCase):
+def test_black_scholes_put_hull(hull_15: OptionTestCase):
     """Test put price method matches Hull example 15.6"""
-    state = _build_state_from_test_case(test_case_hull_15_6)
+    state = _build_state_from_test_case(hull_15)
 
     put = put_price(state)
 
-    assert put == pytest.approx(test_case_hull_15_6.expected_put, abs=0.01)
+    assert put == pytest.approx(hull_15.expected_put, abs=0.01)
 
 
 @pytest.mark.slow

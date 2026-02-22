@@ -6,7 +6,7 @@ from bspx.constants import (
 )
 from bspx.paths import DATA_DIR, RAW_DIR
 from bspx.types import (
-    OptionTestCase,
+    DayCount,
     OptionType,
     PricingFunction,
 )
@@ -18,7 +18,7 @@ __all__ = [
     "TRADING_DAYS_PER_YEAR",
     "DATA_DIR",
     "RAW_DIR",
-    "OptionTestCase",
+    "DayCount",
     "OptionType",
     "PricingFunction",
 ]
