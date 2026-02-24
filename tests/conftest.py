@@ -50,9 +50,9 @@ def hull_19_theta() -> ThetaTestCase:
         market=_HULL_19_MARKET,
         metadata=_HULL_19_METADATA,
         expected_call_calendar=-0.0118,
-        expected_put_calendar=0,
+        expected_put_calendar=-0.0068,
         expected_call_trading=-0.0171,
-        expected_put_trading=0,
+        expected_put_trading=-0.0098,
     )
 
 
@@ -76,5 +76,5 @@ def hull_19_rho() -> RhoTestCase:
         market=_HULL_19_MARKET,
         metadata=_HULL_19_METADATA,
         expected_call=8.91,
-        expected_put=0,
+        expected_put=-9.96,
     )
