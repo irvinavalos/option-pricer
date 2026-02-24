@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from bspx.pricing.black_scholes_model import BlackScholesState
+
 
 @dataclass(frozen=True)
 class MarketState:
@@ -8,6 +10,9 @@ class MarketState:
     T: float
     r: float
     vol: float
+
+    def to_bs_state(self) -> BlackScholesState:
+        return BlackScholesState.build(self.S, self.K, self.T, self.r, self.vol)
 
 
 @dataclass(frozen=True)
