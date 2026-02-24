@@ -4,8 +4,7 @@ from typing import Callable
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from bspx.constants import CALENDAR_DAYS_PER_YEAR
-from bspx.types import OptionType, PricingFunction
+from bspx.types import DayCount, OptionType, PricingFunction
 
 _F64 = NDArray[np.float64]
 
@@ -23,11 +22,11 @@ def delta_fd(
     vol: ArrayLike,
     option_type: OptionType = "call",
 ) -> _F64:
-    _S = _to_f64(S)
-    h = _S * BUMP
+    S_ = _to_f64(S)
+    h = S_ * BUMP
 
-    price_up = pricing_func(_S + h, K, T, r, vol, option_type)
-    price_down = pricing_func(_S - h, K, T, r, vol, option_type)
+    price_up = pricing_func(S_ + h, K, T, r, vol, option_type)
+    price_down = pricing_func(S_ - h, K, T, r, vol, option_type)
 
     return (price_up - price_down) / (2 * h)
 
@@ -40,14 +39,15 @@ def theta_fd(
     r: ArrayLike,
     vol: ArrayLike,
     option_type: OptionType = "call",
+    day_count: DayCount = DayCount.CALENDAR,
 ) -> _F64:
-    _T = _to_f64(T)
-    h = _T * BUMP
+    T_ = _to_f64(T)
+    h = T_ * BUMP
 
-    price_up = pricing_func(S, K, _T + h, r, vol, option_type)
-    price_down = pricing_func(S, K, _T - h, r, vol, option_type)
+    price_up = pricing_func(S, K, T_ + h, r, vol, option_type)
+    price_down = pricing_func(S, K, T_ - h, r, vol, option_type)
 
-    return -(price_up - price_down) / (2 * h * CALENDAR_DAYS_PER_YEAR)
+    return -(price_up - price_down) / (2 * h * day_count)
 
 
 def gamma_fd(
@@ -57,14 +57,13 @@ def gamma_fd(
     T: ArrayLike,
     r: ArrayLike,
     vol: ArrayLike,
-    option_type: OptionType = "call",
 ) -> _F64:
-    _S = _to_f64(S)
-    h = _S * BUMP
+    S_ = _to_f64(S)
+    h = S_ * BUMP
 
-    price_up = pricing_func(_S + h, K, T, r, vol, option_type)
-    price_down = pricing_func(_S - h, K, T, r, vol, option_type)
-    price_curr = pricing_func(_S, K, T, r, vol, option_type)
+    price_up = pricing_func(S_ + h, K, T, r, vol, "call")
+    price_down = pricing_func(S_ - h, K, T, r, vol, "call")
+    price_curr = pricing_func(S_, K, T, r, vol, "call")
 
     return (price_up + price_down - 2 * price_curr) / np.square(h)
 
@@ -76,15 +75,14 @@ def vega_fd(
     T: ArrayLike,
     r: ArrayLike,
     vol: ArrayLike,
-    option_type: OptionType = "call",
 ) -> _F64:
-    _vol = _to_f64(vol)
-    h = _vol * BUMP
+    vol_ = _to_f64(vol)
+    h = vol_ * BUMP
 
-    price_up = pricing_func(S, K, T, r, _vol + h, option_type)
-    price_down = pricing_func(S, K, T, r, _vol - h, option_type)
+    price_up = pricing_func(S, K, T, r, vol_ + h, "call")
+    price_down = pricing_func(S, K, T, r, vol_ - h, "call")
 
-    return (price_up - price_down) / (2 * h * 100)
+    return (price_up - price_down) / (2 * h)
 
 
 def rho_fd(
@@ -96,10 +94,10 @@ def rho_fd(
     vol: ArrayLike,
     option_type: OptionType = "call",
 ) -> _F64:
-    _r = _to_f64(r)
-    h = np.maximum(np.abs(_r), 0.01) * BUMP
+    r_ = _to_f64(r)
+    h = np.maximum(np.abs(r_), 0.01) * BUMP
 
-    price_up = pricing_func(S, K, T, _r + h, vol, option_type)
-    price_down = pricing_func(S, K, T, _r - h, vol, option_type)
+    price_up = pricing_func(S, K, T, r_ + h, vol, option_type)
+    price_down = pricing_func(S, K, T, r_ - h, vol, option_type)
 
-    return (price_up - price_down) / (2 * h * 100)
+    return (price_up - price_down) / (2 * h)

@@ -81,6 +81,7 @@ def test_theta_call_put_relationship(bs_params):
         state, "call", DayCount.CALENDAR
     )
     expected = r * K * np.exp(-r * T) / DayCount.CALENDAR
+    # For threshold use abs instead of rel since expected value could be zero (or close to it)
     assert diff == pytest.approx(expected, abs=1e-6)
 
 
@@ -115,7 +116,7 @@ def test_rho_call_put_relationship(bs_params):
     state = build_black_scholes_state(S, K, T, r, vol)
     scale = K * T * np.exp(-r * T)
     assert rho(state, "call") + np.abs(rho(state, "put")) == pytest.approx(
-        scale, rel=1e-6
+        scale, abs=1e-6
     )
 
 
