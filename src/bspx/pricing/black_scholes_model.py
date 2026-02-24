@@ -23,8 +23,8 @@ def _validate_inputs(
         raise ValueError(f"Error: Asset price 'S' must be positive\n Got: {S}")
     if np.any(np.asarray(K) <= 0):
         raise ValueError(f"Error: Strike price 'K' must be positive\n Got: {K}")
-    if np.any(np.asarray(T) <= 0):
-        raise ValueError(f"Error: Time to maturity 'T' must be positive\n Got: {T}")
+    if np.any(np.asarray(T) < 0):
+        raise ValueError(f"Error: Time to maturity 'T' must be nonnegative\n Got: {T}")
     if np.any(np.asarray(vol) <= 0):
         raise ValueError(f"Error: Volatility 'vol' must be positive\n Got: {vol}")
 
@@ -71,50 +71,50 @@ class BlackScholesState:
     discount: _F64
     vol_sqrt_t: _F64
 
+    @classmethod
+    def build(
+        cls, S: ArrayLike, K: ArrayLike, T: ArrayLike, r: ArrayLike, vol: ArrayLike
+    ) -> "BlackScholesState":
+        _S, _K, _T, _r, _vol = map(_to_f64, (S, K, T, r, vol))
+        _validate_inputs(_S, _K, _T, _vol)
 
-def build_black_scholes_state(
-    S: ArrayLike,
-    K: ArrayLike,
-    T: ArrayLike,
-    r: ArrayLike,
-    vol: ArrayLike,
-) -> BlackScholesState:
-    _S, _K, _T, _r, _vol = map(_to_f64, (S, K, T, r, vol))
-    _validate_inputs(_S, _K, _T, _vol)
+        sqrt_t = np.sqrt(_T)
+        vol_sqrt_t = _vol * sqrt_t
 
-    sqrt_t = np.sqrt(_T)
-    vol_sqrt_t = _vol * sqrt_t
+        d1 = (np.log(_S / _K) + (_r + 0.5 * np.square(_vol)) * _T) / vol_sqrt_t
+        d2 = d1 - vol_sqrt_t
 
-    d1 = (np.log(_S / _K) + (_r + 0.5 * np.square(_vol)) * _T) / vol_sqrt_t
-    d2 = d1 - vol_sqrt_t
+        return cls(
+            S=_S,
+            K=_K,
+            T=_T,
+            r=_r,
+            vol=_vol,
+            d1=d1,
+            d2=d2,
+            cdf_d1=norm.cdf(d1),
+            cdf_d2=norm.cdf(d2),
+            pdf_d1=norm.pdf(d1),
+            cdf_nd1=norm.cdf(-d1),
+            cdf_nd2=norm.cdf(-d2),
+            sqrt_t=sqrt_t,
+            discount=np.exp(-_r * _T),
+            vol_sqrt_t=vol_sqrt_t,
+        )
 
-    return BlackScholesState(
-        S=_S,
-        K=_K,
-        T=_T,
-        r=_r,
-        vol=_vol,
-        d1=d1,
-        d2=d2,
-        cdf_d1=norm.cdf(d1),
-        cdf_d2=norm.cdf(d2),
-        pdf_d1=norm.pdf(d1),
-        cdf_nd1=norm.cdf(-d1),
-        cdf_nd2=norm.cdf(-d2),
-        sqrt_t=sqrt_t,
-        discount=np.exp(-_r * _T),
-        vol_sqrt_t=vol_sqrt_t,
-    )
+    def call_price(self) -> _F64:
+        payoff = np.maximum(self.S - self.K * self.discount, 0.0)
+        price = self.S * self.cdf_d1 - self.K * self.discount * self.cdf_d2
+        return np.where(self.T > 0, price, payoff)
 
-
-def call_price(state: BlackScholesState) -> _F64:
-    # c = S * N(d1) - K * e^(-rT) * N(d2)
-    return state.S * state.cdf_d1 - state.K * state.discount * state.cdf_d2
+    def put_price(self) -> _F64:
+        payoff = np.maximum(self.K * self.discount - self.S, 0.0)
+        price = self.K * self.discount * self.cdf_nd2 - self.S * self.cdf_nd1
+        return np.where(self.T > 0, price, payoff)
 
 
-def put_price(state: BlackScholesState) -> _F64:
-    # p = K * e^(-rT) * N(-d2) - S * N(-d1)
-    return state.K * state.discount * state.cdf_nd2 - state.S * state.cdf_nd1
+def build_black_scholes_state(*args, **kwargs) -> BlackScholesState:
+    return BlackScholesState.build(*args, **kwargs)
 
 
 def black_scholes_price(
@@ -125,10 +125,10 @@ def black_scholes_price(
     vol: ArrayLike,
     option_type: OptionType = "call",
 ) -> _F64:
-    state = build_black_scholes_state(S, K, T, r, vol)
+    state = BlackScholesState.build(S, K, T, r, vol)
 
     match option_type:
         case "call":
-            return call_price(state)
+            return state.call_price()
         case "put":
-            return put_price(state)
+            return state.put_price()

@@ -13,7 +13,7 @@ def delta(state: BlackScholesState, option_type: OptionType) -> _F64:
         case "call":
             return state.cdf_d1
         case "put":
-            return state.cdf_d1 - 1
+            return -state.cdf_nd1
 
 
 def theta(
@@ -21,7 +21,9 @@ def theta(
     option_type: OptionType,
     day_count: DayCount = DayCount.CALENDAR,
 ) -> _F64:
-    decay = (-state.S * state.pdf_d1 * state.vol) / (2 * state.sqrt_t)
+    decay = np.where(
+        state.T > 0, (-state.S * state.pdf_d1 * state.vol) / (2 * state.sqrt_t), 0.0
+    )
     discount = state.K * state.discount
 
     match option_type:

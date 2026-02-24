@@ -9,6 +9,7 @@ from bspx.types import (
     DayCount,
     OptionType,
     PricingFunction,
+    PricingModel,
 )
 
 __all__ = [
@@ -21,4 +22,5 @@ __all__ = [
     "DayCount",
     "OptionType",
     "PricingFunction",
+    "PricingModel",
 ]

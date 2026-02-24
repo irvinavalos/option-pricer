@@ -1,8 +1,10 @@
 from enum import IntEnum
-from typing import Callable, Literal, NamedTuple
+from typing import Callable, Literal, Protocol, runtime_checkable
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
+
+_F64 = NDArray[np.float64]
 
 type OptionType = Literal["call", "put"]
 
@@ -21,39 +23,12 @@ type PricingFunction = Callable[
         ArrayLike,
         OptionType,
     ],
-    NDArray[np.float64],
+    _F64,
 ]
 
 
-class OptionTestCase(NamedTuple):
-    name: str
-    S: ArrayLike
-    K: ArrayLike
-    T: ArrayLike
-    r: ArrayLike
-    vol: ArrayLike
-    expected_call: ArrayLike
-    expected_put: ArrayLike
-    source: str
-    notes: str | None = None
+@runtime_checkable
+class PricingModel(Protocol):
+    def call_price(self) -> _F64: ...
 
-
-class GreekTestCase(NamedTuple):
-    name: str
-    S: ArrayLike
-    K: ArrayLike
-    T: ArrayLike
-    r: ArrayLike
-    vol: ArrayLike
-    expected_delta_call: ArrayLike
-    expected_delta_put: ArrayLike | None
-    expected_theta_call_calendar: ArrayLike
-    expected_theta_call_trading: ArrayLike
-    expected_theta_put_calendar: ArrayLike | None
-    expected_theta_put_trading: ArrayLike | None
-    expected_gamma: ArrayLike
-    expected_vega: ArrayLike
-    expected_rho_call: ArrayLike
-    expected_rho_put: ArrayLike | None
-    source: str
-    notes: str | None = None
+    def put_price(self) -> _F64: ...
