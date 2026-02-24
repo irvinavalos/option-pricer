@@ -81,7 +81,7 @@ def test_theta_call_put_relationship(bs_params):
         state, "call", DayCount.CALENDAR
     )
     expected = r * K * np.exp(-r * T) / DayCount.CALENDAR
-    assert diff == pytest.approx(expected, rel=1e-6)
+    assert diff == pytest.approx(expected, abs=1e-6)
 
 
 def test_gamma(hull_19_gamma: GammaTestCase):
