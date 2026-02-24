@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import NewType
 
@@ -46,7 +47,7 @@ def _validate_and_clean_data(df: pd.DataFrame, ticker: Ticker) -> pd.DataFrame |
 
     if len(available_cols) < 4:
         missing = list(set(required_cols) - set(available_cols))
-        print(f"Warning: {ticker} missing required columns: {missing}")
+        logging.error(f"Warning: {ticker} missing required columns: {missing}")
 
         return None
 
@@ -72,20 +73,22 @@ def get_stock_data(
             try:
                 df = _get_ticker_returns(ticker_path)
             except Exception as e:
-                print(f"Warning: Couldn't load cached data for {ticker}: {e}")
+                logging.exception(
+                    f"Warning: Couldn't load cached data for {ticker}: {e}"
+                )
                 df = None
 
         if df is None:
             df = _download_ticker_returns(ticker, start_date, end_date)
 
             if df is None:
-                print(f"Warning: Couldn't download data for {ticker}")
+                logging.error(f"Warning: Couldn't download data for {ticker}")
                 continue
 
         clean_df = _validate_and_clean_data(df, ticker)
 
         if clean_df is None:
-            print(f"Warning: Invalid data structure for {ticker}, skipping...")
+            logging.error(f"Warning: Invalid data structure for {ticker}, skipping...")
             continue
 
         if not ticker_path.exists():

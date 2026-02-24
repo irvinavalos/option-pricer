@@ -75,21 +75,23 @@ class BlackScholesState:
     def build(
         cls, S: ArrayLike, K: ArrayLike, T: ArrayLike, r: ArrayLike, vol: ArrayLike
     ) -> "BlackScholesState":
-        _S, _K, _T, _r, _vol = map(_to_f64, (S, K, T, r, vol))
-        _validate_inputs(_S, _K, _T, _vol)
+        S_, K_, T_, r_, vol_ = map(_to_f64, (S, K, T, r, vol))
+        _validate_inputs(S_, K_, T_, vol_)
 
-        sqrt_t = np.sqrt(_T)
-        vol_sqrt_t = _vol * sqrt_t
+        sqrt_t = np.sqrt(T_)
+        vol_sqrt_t = vol_ * sqrt_t
+        safe_vol_sqrt_t = np.where(T_ > 0, vol_sqrt_t, 1.0)
 
-        d1 = (np.log(_S / _K) + (_r + 0.5 * np.square(_vol)) * _T) / vol_sqrt_t
+        d1 = (np.log(S_ / K_) + (r_ + 0.5 * np.square(vol_)) * T_) / safe_vol_sqrt_t
+        d1 = np.where(T_ > 0, d1, np.where(S_ >= K_, 1e10, 1e-10))
         d2 = d1 - vol_sqrt_t
 
         return cls(
-            S=_S,
-            K=_K,
-            T=_T,
-            r=_r,
-            vol=_vol,
+            S=S_,
+            K=K_,
+            T=T_,
+            r=r_,
+            vol=vol_,
             d1=d1,
             d2=d2,
             cdf_d1=norm.cdf(d1),
@@ -98,7 +100,7 @@ class BlackScholesState:
             cdf_nd1=norm.cdf(-d1),
             cdf_nd2=norm.cdf(-d2),
             sqrt_t=sqrt_t,
-            discount=np.exp(-_r * _T),
+            discount=np.exp(-r_ * T_),
             vol_sqrt_t=vol_sqrt_t,
         )
 

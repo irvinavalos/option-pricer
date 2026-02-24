@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 
-from bspx.types import ArrayLike
+import numpy as np
+from numpy.typing import NDArray
 
 
 @dataclass(slots=True, frozen=True)
 class OptionPrice:
-    call: ArrayLike
-    put: ArrayLike
+    call: NDArray[np.float64]
+    put: NDArray[np.float64]
 
     def __repr__(self) -> str:
         return f"OptionPrice(call={self.call}, put={self.put})"
@@ -14,11 +15,11 @@ class OptionPrice:
 
 @dataclass(slots=True, frozen=True)
 class Greeks:
-    delta: ArrayLike
-    theta: ArrayLike
-    gamma: ArrayLike
-    vega: ArrayLike
-    rho: ArrayLike
+    delta: NDArray[np.float64]
+    theta: NDArray[np.float64]
+    gamma: NDArray[np.float64]
+    vega: NDArray[np.float64]
+    rho: NDArray[np.float64]
 
     def __repr__(self) -> str:
         return f"Greeks(delta={self.delta},theta={self.theta}, gamma={self.gamma}, vega={self.vega}, rho={self.rho})"

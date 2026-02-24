@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-TRADING_DAYS_PER_YEAR = 252
+from bspx import DayCount
 
 
 def calculate_log_returns(prices: pd.Series) -> pd.Series:
@@ -15,7 +15,7 @@ def calculate_rolling_vol(
     vol = log_returns.rolling(window=window).std()
 
     if annualize:
-        vol *= np.sqrt(TRADING_DAYS_PER_YEAR)
+        vol *= np.sqrt(DayCount.TRADING)
 
     return vol
 
@@ -27,7 +27,7 @@ def calculate_ewma_vol(
     vol = log_returns.ewm(span=span).std()
 
     if annualize:
-        vol *= np.sqrt(TRADING_DAYS_PER_YEAR)
+        vol *= np.sqrt(DayCount.TRADING)
 
     return vol
 
@@ -58,6 +58,6 @@ def realized_volatility(
     vol = recent_returns.std()
 
     if annualize:
-        vol *= np.sqrt(TRADING_DAYS_PER_YEAR)
+        vol *= np.sqrt(DayCount.TRADING)
 
     return vol
