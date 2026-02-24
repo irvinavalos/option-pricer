@@ -21,12 +21,14 @@ def _objective_func(
     """Price of model - Market price for a specific volatility"""
     state = build_black_scholes_state(S, K, T, r, vol)
     price = state.call_price() if option_type == "call" else state.put_price()
+
     return float(price) - market_price
 
 
 def _manaster_koehler(S: float, K: float, T: float, r: float) -> float:
-    _F = float(forward_price(S, T, r))
-    return np.sqrt(2 * np.abs(np.log(_F / K)) / T)
+    F_ = float(forward_price(S, T, r))
+
+    return np.sqrt(2 * np.abs(np.log(F_ / K)) / T)
 
 
 def _vega_scalar(
@@ -38,21 +40,29 @@ def _vega_scalar(
     r: float,
     option_type: OptionType,
 ) -> float:
+    _ = (market_price, option_type)
     state = build_black_scholes_state(S, K, T, r, vol)
+
     return float(vega(state))
 
 
 def _check_no_arbitrage(
     market_price: float, S: float, K: float, T: float, r: float, option_type: OptionType
 ) -> None:
-    discount = K * np.exp(-r * T)
-    intrinsic = (
-        max(S - discount, 0.0) if option_type == "call" else max(discount - S, 0.0)
-    )
-    if market_price < intrinsic:
+    df = np.exp(-r * T)
+
+    match option_type:
+        case "call":
+            lower_bound = max(S - K * df, 0.0)
+            upper_bound = S
+        case "put":
+            lower_bound = max(K * df - S, 0.0)
+            upper_bound = K * df
+
+    if market_price < lower_bound or market_price > upper_bound:
         raise ValueError(
-            f"Market Price: {market_price:.4f} violates no arbitrage bounds"
-            f"Intrinsic Value: {intrinsic:.4f} undefined"
+            f"Market Price {market_price:.4f} is outside no arbitrage bounds "
+            f"[{lower_bound:.4f}, {upper_bound:.4f}] IV is undefined"
         )
 
 
@@ -74,6 +84,7 @@ def implied_vol_newton(
     - Raises ValueError if convergence fails, use 'implied_vol_brent' as fallback
     """
     _check_no_arbitrage(market_price, S, K, T, r, option_type)
+
     vol_0 = _manaster_koehler(S, K, T, r)
     root = newton(
         func=_objective_func,
@@ -84,6 +95,7 @@ def implied_vol_newton(
         maxiter=max_iter,
         full_output=False,
     )
+
     return cast(float, root)
 
 
@@ -105,15 +117,30 @@ def implied_vol_brent(
     - Slower than Newton-Raphson but is able to handle cases where vega tends to zero
     """
     _check_no_arbitrage(market_price, S, K, T, r, option_type)
+
+    root = brentq(
+        f=_objective_func,
+        a=vol_lo,
+        b=vol_hi,
+        args=(market_price, S, K, T, r, option_type),
+        xtol=tol,
+        full_output=False,
+    )
+
+    return cast(float, root)
+
+
+def implied_vol(
+    market_price: float,
+    S: float,
+    K: float,
+    T: float,
+    r: float,
+    option_type: OptionType = "call",
+) -> float:
+    _check_no_arbitrage(market_price, S, K, T, r, option_type)
+
     try:
-        root = brentq(
-            f=_objective_func,
-            a=vol_lo,
-            b=vol_hi,
-            args=(market_price, S, K, T, r, option_type),
-            xtol=tol,
-            full_output=False,
-        )
-        return cast(float, root)
+        return implied_vol_newton(market_price, S, K, T, r, option_type)
     except RuntimeError:
-        return implied_vol_brent(market_price, S, K, T, r, option_type, tol)
+        return implied_vol_brent(market_price, S, K, T, r, option_type)
