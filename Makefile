@@ -19,6 +19,15 @@ clean:
 	@rm -rf  $(DATA_DIR)
 	@rm -rf __pycache__ .pytest_cache .hypothesis
 
+lint:
+	@uv run ruff check src/ tests/
+
+format:
+	@uv run ruff format src/ tests/
+
+lint-fix:
+	@uv run ruff check --fix src/ tests/
+
 test:
 	@uv run pytest
 

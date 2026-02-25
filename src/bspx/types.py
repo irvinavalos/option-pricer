@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from enum import IntEnum
-from typing import Callable, Literal, Protocol, runtime_checkable
+from typing import Literal, Protocol, runtime_checkable
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray

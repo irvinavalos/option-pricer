@@ -1,5 +1,4 @@
 import pytest
-
 from tests.cases import (
     DeltaTestCase,
     GammaTestCase,

@@ -11,6 +11,7 @@ wheels/
 
 # Unit test
 .hypothesis/
+.coverage
 
 # Local data folder
 data/
