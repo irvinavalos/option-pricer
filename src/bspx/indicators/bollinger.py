@@ -29,8 +29,8 @@ def generate_bollinger_signals(
         data[price_col].shift(1) > data["Lower_Band"].shift(1)
     )
 
-    sell_condition = (data[price_col] >= data["Lower_Band"]) & (
-        data[price_col].shift(1) < data["Lower_Band"].shift(1)
+    sell_condition = (data[price_col] >= data["Upper_Band"]) & (
+        data[price_col].shift(1) < data["Upper_Band"].shift(1)
     )
 
     signals[buy_condition] = 1
