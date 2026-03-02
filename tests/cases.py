@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from bspx.pricing.black_scholes_model import BlackScholesState
+from bspx.pricing import BlackScholesState
 
 
 @dataclass(frozen=True)

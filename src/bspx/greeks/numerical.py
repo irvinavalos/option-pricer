@@ -1,103 +1,80 @@
-from collections.abc import Callable
-from functools import partial
+from numpy.typing import ArrayLike
 
-import numpy as np
-from numpy.typing import ArrayLike, NDArray
-
-from bspx.types import DayCount, OptionType, PricingFunction
-
-_F64 = NDArray[np.float64]
-
-_to_f64: Callable[[ArrayLike], _F64] = partial(np.asarray, dtype=np.float64)
-
-BUMP = 1e-4
+from bspx.greeks.formulas import numerical
+from bspx.types import _F64, DayCount, DiffMethod, OptionType, PricingFunction
 
 
-def delta_fd(
-    pricing_func: PricingFunction,
-    S: ArrayLike,
-    K: ArrayLike,
-    T: ArrayLike,
-    r: ArrayLike,
-    vol: ArrayLike,
-    option_type: OptionType = "call",
-) -> _F64:
-    S_ = _to_f64(S)
-    h = S_ * BUMP
+class NumericalBackend:
+    method = DiffMethod.NUMERICAL
 
-    price_up = pricing_func(S_ + h, K, T, r, vol, option_type)
-    price_down = pricing_func(S_ - h, K, T, r, vol, option_type)
+    def __init__(
+        self,
+        pricing_func: PricingFunction,
+        S: ArrayLike,
+        K: ArrayLike,
+        T: ArrayLike,
+        r: ArrayLike,
+        vol: ArrayLike,
+    ) -> None:
+        self._pricing_func = pricing_func
+        self._S = S
+        self._K = K
+        self._T = T
+        self._r = r
+        self._vol = vol
 
-    return (price_up - price_down) / (2 * h)
+    def delta(self, option_type: OptionType = "call") -> _F64:
+        return numerical.delta_fd(
+            self._pricing_func,
+            self._S,
+            self._K,
+            self._T,
+            self._r,
+            self._vol,
+            option_type,
+        )
 
+    def theta(
+        self, option_type: OptionType = "call", day_count: DayCount = DayCount.CALENDAR
+    ) -> _F64:
+        return numerical.theta_fd(
+            self._pricing_func,
+            self._S,
+            self._K,
+            self._T,
+            self._r,
+            self._vol,
+            option_type,
+            day_count,
+        )
 
-def theta_fd(
-    pricing_func: PricingFunction,
-    S: ArrayLike,
-    K: ArrayLike,
-    T: ArrayLike,
-    r: ArrayLike,
-    vol: ArrayLike,
-    option_type: OptionType = "call",
-    day_count: DayCount = DayCount.CALENDAR,
-) -> _F64:
-    T_ = _to_f64(T)
-    h = T_ * BUMP
+    def gamma(self) -> _F64:
+        return numerical.gamma_fd(
+            self._pricing_func,
+            self._S,
+            self._K,
+            self._T,
+            self._r,
+            self._vol,
+        )
 
-    price_up = pricing_func(S, K, T_ + h, r, vol, option_type)
-    price_down = pricing_func(S, K, T_ - h, r, vol, option_type)
+    def vega(self) -> _F64:
+        return numerical.vega_fd(
+            self._pricing_func,
+            self._S,
+            self._K,
+            self._T,
+            self._r,
+            self._vol,
+        )
 
-    return -(price_up - price_down) / (2 * h * day_count)
-
-
-def gamma_fd(
-    pricing_func: PricingFunction,
-    S: ArrayLike,
-    K: ArrayLike,
-    T: ArrayLike,
-    r: ArrayLike,
-    vol: ArrayLike,
-) -> _F64:
-    S_ = _to_f64(S)
-    h = S_ * BUMP
-
-    price_up = pricing_func(S_ + h, K, T, r, vol, "call")
-    price_down = pricing_func(S_ - h, K, T, r, vol, "call")
-    price_curr = pricing_func(S_, K, T, r, vol, "call")
-
-    return (price_up + price_down - 2 * price_curr) / np.square(h)
-
-
-def vega_fd(
-    pricing_func: PricingFunction,
-    S: ArrayLike,
-    K: ArrayLike,
-    T: ArrayLike,
-    r: ArrayLike,
-    vol: ArrayLike,
-) -> _F64:
-    vol_ = _to_f64(vol)
-    h = vol_ * BUMP
-
-    price_up = pricing_func(S, K, T, r, vol_ + h, "call")
-    price_down = pricing_func(S, K, T, r, vol_ - h, "call")
-
-    return (price_up - price_down) / (2 * h)
-
-
-def rho_fd(
-    pricing_func: PricingFunction,
-    S: ArrayLike,
-    K: ArrayLike,
-    T: ArrayLike,
-    r: ArrayLike,
-    vol: ArrayLike,
-    option_type: OptionType = "call",
-) -> _F64:
-    r_ = _to_f64(r)
-    h = np.maximum(np.abs(r_), 0.01) * BUMP
-
-    price_up = pricing_func(S, K, T, r_ + h, vol, option_type)
-    price_down = pricing_func(S, K, T, r_ - h, vol, option_type)
-
-    return (price_up - price_down) / (2 * h)
+    def rho(self, option_type: OptionType = "call") -> _F64:
+        return numerical.rho_fd(
+            self._pricing_func,
+            self._S,
+            self._K,
+            self._T,
+            self._r,
+            self._vol,
+            option_type,
+        )

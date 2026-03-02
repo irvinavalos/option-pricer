@@ -3,9 +3,8 @@ from typing import cast
 import numpy as np
 from scipy.optimize import brentq, newton
 
-from bspx.greeks.analytical import vega
-from bspx.pricing.black_scholes_model import build_black_scholes_state
-from bspx.pricing.forwards import forward_price
+from bspx.greeks import AnalyticalBackend
+from bspx.pricing import build_black_scholes_state, forward_price
 from bspx.types import OptionType
 
 
@@ -42,8 +41,8 @@ def _vega_scalar(
 ) -> float:
     _ = (market_price, option_type)
     state = build_black_scholes_state(S, K, T, r, vol)
-
-    return float(vega(state))
+    backend = AnalyticalBackend(state)
+    return float(backend.vega())
 
 
 def _check_no_arbitrage(
@@ -138,8 +137,6 @@ def implied_vol(
     r: float,
     option_type: OptionType = "call",
 ) -> float:
-    _check_no_arbitrage(market_price, S, K, T, r, option_type)
-
     try:
         return implied_vol_newton(market_price, S, K, T, r, option_type)
     except RuntimeError:

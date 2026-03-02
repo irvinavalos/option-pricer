@@ -1,12 +1,8 @@
-from collections.abc import Callable
-from functools import partial
-
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import ArrayLike
 
-_F64 = NDArray[np.float64]
-
-_to_f64: Callable[[ArrayLike], _F64] = partial(np.asarray, dtype=np.float64)
+from bspx.numeric_utils import to_f64
+from bspx.types import _F64
 
 
 def forward_price(
@@ -25,5 +21,5 @@ def forward_price(
         r:  Annual risk-free rate
         q:  Dividend yield (defaults to 0 for non-dividend paying assets)
     """
-    (S_, T_, r_, q_) = map(_to_f64, (S, T, r, q))
+    (S_, T_, r_, q_) = map(to_f64, (S, T, r, q))
     return S_ * np.exp((r_ - q_) * T_)

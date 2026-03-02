@@ -1,16 +1,11 @@
-from collections.abc import Callable
 from dataclasses import dataclass
-from functools import partial
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import ArrayLike
 from scipy.stats import norm
 
-from bspx.types import OptionType
-
-_F64 = NDArray[np.float64]
-
-_to_f64: Callable[[ArrayLike], _F64] = partial(np.asarray, dtype=np.float64)
+from bspx.numeric_utils import to_f64
+from bspx.types import _F64, OptionType
 
 
 def _validate_inputs(
@@ -75,7 +70,7 @@ class BlackScholesState:
     def build(
         cls, S: ArrayLike, K: ArrayLike, T: ArrayLike, r: ArrayLike, vol: ArrayLike
     ) -> "BlackScholesState":
-        S_, K_, T_, r_, vol_ = map(_to_f64, (S, K, T, r, vol))
+        S_, K_, T_, r_, vol_ = map(to_f64, (S, K, T, r, vol))
         _validate_inputs(S_, K_, T_, vol_)
 
         sqrt_t = np.sqrt(T_)
@@ -86,6 +81,9 @@ class BlackScholesState:
         d1 = np.where(T_ > 0, d1, np.where(S_ >= K_, 1e10, 1e-10))
         d2 = d1 - vol_sqrt_t
 
+        cdf_d1 = norm.cdf(d1)
+        cdf_d2 = norm.cdf(d2)
+
         return cls(
             S=S_,
             K=K_,
@@ -94,11 +92,11 @@ class BlackScholesState:
             vol=vol_,
             d1=d1,
             d2=d2,
-            cdf_d1=norm.cdf(d1),
-            cdf_d2=norm.cdf(d2),
+            cdf_d1=cdf_d1,
+            cdf_d2=cdf_d2,
             pdf_d1=norm.pdf(d1),
-            cdf_nd1=norm.cdf(-d1),
-            cdf_nd2=norm.cdf(-d2),
+            cdf_nd1=1.0 - cdf_d1,
+            cdf_nd2=1.0 - cdf_d2,
             sqrt_t=sqrt_t,
             discount=np.exp(-r_ * T_),
             vol_sqrt_t=vol_sqrt_t,

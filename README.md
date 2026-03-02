@@ -2,5 +2,5 @@
 
 ## TODO
 
-- [ ] Add tests for greeks/numerical.py
-- [ ] Add tests for volatility/implied_volatility.py
+- [X] Add tests for greeks/numerical.py
+- [X] Add tests for volatility/implied_volatility.py

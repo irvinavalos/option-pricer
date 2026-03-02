@@ -4,9 +4,7 @@ from hypothesis import given, settings
 from tests.cases import OptionTestCase
 from tests.hypothesis_strategies import gen_black_scholes_parameters
 
-from bspx.pricing.black_scholes_model import (
-    build_black_scholes_state,
-)
+from bspx.pricing import build_black_scholes_state
 
 
 def test_black_scholes_call_hull(hull_15: OptionTestCase):
