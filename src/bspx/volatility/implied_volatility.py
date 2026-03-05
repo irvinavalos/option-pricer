@@ -7,6 +7,8 @@ from bspx.greeks import AnalyticalBackend
 from bspx.pricing import build_black_scholes_state, forward_price
 from bspx.types import OptionType
 
+_MIN_VOL: float = 1e-8
+
 
 def _objective_func(
     vol: float,
@@ -18,15 +20,14 @@ def _objective_func(
     option_type: OptionType = "call",
 ) -> float:
     """Price of model - Market price for a specific volatility"""
+    vol = max(vol, _MIN_VOL)
     state = build_black_scholes_state(S, K, T, r, vol)
     price = state.call_price() if option_type == "call" else state.put_price()
-
     return float(price) - market_price
 
 
 def _manaster_koehler(S: float, K: float, T: float, r: float) -> float:
     F_ = float(forward_price(S, T, r))
-
     return np.sqrt(2 * np.abs(np.log(F_ / K)) / T)
 
 
@@ -40,6 +41,7 @@ def _vega_scalar(
     option_type: OptionType,
 ) -> float:
     _ = (market_price, option_type)
+    vol = max(vol, _MIN_VOL)
     state = build_black_scholes_state(S, K, T, r, vol)
     backend = AnalyticalBackend(state)
     return float(backend.vega())

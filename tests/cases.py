@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
+from bspx.greeks import AnalyticalBackend, NumericalBackend
 from bspx.pricing import BlackScholesState
+from bspx.types import PricingFunction
 
 
 @dataclass(frozen=True)
@@ -13,6 +15,12 @@ class MarketState:
 
     def to_bs_state(self) -> BlackScholesState:
         return BlackScholesState.build(self.S, self.K, self.T, self.r, self.vol)
+
+    def analytical_backend(self) -> AnalyticalBackend:
+        return AnalyticalBackend(self.to_bs_state())
+
+    def numerical_backend(self, pricing_func: PricingFunction) -> NumericalBackend:
+        return NumericalBackend(pricing_func, self.S, self.K, self.T, self.r, self.vol)
 
 
 @dataclass(frozen=True)
