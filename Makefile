@@ -1,46 +1,24 @@
-APP = bspx
-DATA_DIR = data
+PACKAGE = quantoptions
 
-SRC = src
-PACKAGE = bspx
-
-TESTS = tests
-
-PRICING = pricing
-GREEKS = greeks
+.PHONY: sync clean lint lint-fix format type-check
 
 sync:
 	@uv sync
 
-run: sync
-	@uv run python -m $(APP)
+sync-dev:
+	@uv sync --extra dev
 
 clean:
-	@rm -rf  $(DATA_DIR)
-	@rm -rf __pycache__ .pytest_cache .hypothesis
+	@rm -rf __pycache__
 
 lint:
-	@uv run ruff check src/ tests/
-
-format:
-	@uv run ruff format src/ tests/
+	@uv run ruff check $(PACKAGE)
 
 lint-fix:
-	@uv run ruff check --fix src/ tests/
+	@uv run ruff check --fix $(PACKAGE)
 
-test:
-	@uv run pytest
+format:
+	@uv run ruff format $(PACKAGE)
 
-test-pricing:
-	@uv run pytest $(TESTS)/$(PRICING)
-
-test-greeks:
-	@uv run pytest $(TESTS)/$(GREEKS)
-
-test-fast:
-	@uv run pytest -m "not slow"
-
-test-cov:
-	@uv run pytest --cov=src/bspx --cov-report=term-missing
-
-.PHONY: sync run clean test test-pricing test-fast test-cov
+type-check:
+	@uv run pyright $(PACKAGE)

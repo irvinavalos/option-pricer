@@ -1,24 +1,32 @@
-[project]
-name = "bspx"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "numpy>=2.4.2",
-    "plotly>=6.5.2",
-    "scipy>=1.17.0",
-    "setuptools>=82.0.0",
-    "yfinance>=1.1.0",
-]
-
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "quantoptions"
+version = "0.1.0"
+description = "Python library for options pricing and more"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jax>=0.9.1",
+    "jaxlib>=0.9.1",
+]
+
+[pyproject.optional-dependencies]
+dev = [
+    "hypothesis>=6.151.9",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+]
+
+[tool.setuptools]
+packages = ["quantoptions"]
+
+# -------------------- LSP Config --------------------
+
 [tool.pyright]
-include = ["src"]
-exclude = ["tests"]
+include = ["quantoptions", "tests"]
 venvPath = "."
 venv = ".venv"
 typeCheckingMode = "standard"
@@ -30,9 +38,17 @@ reportPropertyTypeMismatch = true
 strictListInference = true
 strictDictionaryInference = true
 
+# -------------------- Formatter Config --------------------
+
 [tool.ruff]
-src = ["src"]
+src = ["quantoptions"]
 line-length = 88
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# -------------------- Linter Config --------------------
 
 [tool.ruff.lint]
 select = [
@@ -49,46 +65,9 @@ select = [
 ]
 ignore = [
     "E501", # Line length (already handled by the formatter)
-    "N803", # Argument name should be lowercase (Allow 'S', 'K' for options math)
-    "N806", # Variable name should be lowercase (Allow 'S', 'K' inside functions)
+    "N803", # Argument name should be lowercase (Allow 'S', 'K' for math)
+    "N806", # Variable name should be lowercase (Allow 'S', 'K' in functions)
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["bspx"]
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.pytest.ini_options]
-pythonpath = ["src"]
-minversion = "9.0"
-testpaths = ["tests"]
-addopts = [
-    "-ra",
-    "-q",
-    "--tb=short",
-    "--strict-markers",
-    "--import-mode=importlib",
-]
-norecursedirs = [
-    ".*",
-    "build",
-    "dist",
-    "*.egg",
-    "__pycache__",
-]
-markers=[
-    "slow: mark tests as slow (deselect with '-m \"not slow\"')",
-]
-
-[dependency-groups]
-dev = [
-    "hypothesis>=6.151.9",
-    "pytest>=9.0.2",
-    "pytest-cov>=7.0.0",
-    "pandas-stubs>=3.0.0.260204",
-]
+known-first-party = ["quantoptions"]
